@@ -1,9 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { getAccessToken } from './auth.js';
 import { URL } from 'url';
 
-/// Helper function to safely send notifications (used by makeApiCall)
+// Helper function to safely send notifications (used by makeApiCall)
 async function safeNotify(sendNotification: (notification: any) => void | Promise<void>, notification: any): Promise<void> {
   try {
     await sendNotification(notification);
@@ -59,9 +60,16 @@ export async function makeApiCall(
       params: { level: 'info', data: `Calling ${method} ${url}` }
     });
 
-  // Use PAT from environment for auth
-  const token = process.env.AZDO_PAT || '35TWJV668ReQIouJ4oyVyQvAeKH3ukzgrf8DWi45d40RRErHqBR1JQQJ99BIACAAAAAMF3UqAAASAZDO34VZ';
-  const authHeader = 'Basic ' + Buffer.from(':' + token).toString('base64');
+  // Acquire Azure AD user token (Device Code flow) and use Bearer auth
+  let authHeader = '';
+  try {
+    const accessToken = await getAccessToken(async (n: any) => { await safeNotify(sendNotification, n); });
+    authHeader = 'Bearer ' + accessToken;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await safeNotify(sendNotification, { method: 'notifications/message', params: { level: 'error', data: `Authentication failed: ${msg}` } });
+    return { isError: true, content: [{ type: 'text', text: `Authentication failed: ${msg}` }] };
+  }
 
     const response = await fetch(url, {
       method: method,
@@ -676,6 +684,7 @@ export const getServer = (): McpServer => {
     }
   );
 
+  // Tool: analyze X++ customizations by scanning all folders and computing filename relevance
   const analyzeXppFormCustomizationsSchema = z.object({
     objectName: z.string().describe('Search keyword (e.g. supervisor) to match against XML filenames'),
     repo: z.string().optional().describe('Azure DevOps repository name; falls back to env AZDO_XPP_REPO'),
@@ -684,7 +693,7 @@ export const getServer = (): McpServer => {
     maxFiles: z.number().optional().describe('Maximum number of matched files whose content to fetch (default 15)'),
     maxContentChars: z.number().optional().describe('Maximum characters of raw XML to include per file (default 3500)')
   });
-  
+
   server.tool(
     'analyzeXppFormCustomizations',
     'Scan all folders (and nested same-named folders) in the repo for XML artifacts and return those whose filenames match the query with >= threshold relevance.',
@@ -822,8 +831,6 @@ export const getServer = (): McpServer => {
       }
     }
   );
+
   return server;
 };
-
-
-
