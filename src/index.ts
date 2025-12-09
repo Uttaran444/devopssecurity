@@ -197,5 +197,3 @@ function validateEnv() {
 validateEnv();
 
 app.listen(PORT, () => { log('info', 'Server listening', { port: PORT, path: '/mcp' }); });
-
-
