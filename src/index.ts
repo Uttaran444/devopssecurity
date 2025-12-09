@@ -113,11 +113,16 @@ const mcpServer = new McpServer({ name: 'ado-mcp-server', version: '1.0.0' });
 mcpServer.registerTool(
   'ado_list_projects',
   { title: 'List Azure DevOps projects', description: 'Returns projects from dev.azure.com/{organization}' },
-  async (_input, extra) => {
+  async (...cbArgs: any[]) => {
+    // Support both callback signatures:
+    // - (extra) when no inputSchema
+    // - (args, extra) when inputSchema is provided
+    const extra = cbArgs.length === 1 ? cbArgs[0] : cbArgs[1];
     const cid = (extra as any)?.cid || 'no-cid';
-    log('debug', 'Tool ado_list_projects invoked', { cid, org: ADO_ORG, apiVersion: ADO_API_VERSION, authInfoPresent: !!extra?.authInfo });
+    const hasAuthInfo = !!extra?.authInfo;
+    log('debug', 'Tool ado_list_projects invoked', { cid, org: ADO_ORG, apiVersion: ADO_API_VERSION, authInfoPresent: hasAuthInfo });
 
-    const userToken = extra.authInfo?.token ?? '';
+    const userToken = extra?.authInfo?.token ?? '';
     if (!userToken) {
       log('warn', 'Missing bearer token in tool context', { cid });
       return { content: [{ type: 'text', text: 'Missing bearer token (Copilot OAuth not forwarded).' }], isError: true };
