@@ -1,4 +1,4 @@
-// server.ts
+/// server.ts
 import express from 'express';
 import axios, { AxiosError } from 'axios';
 import dotenv from 'dotenv';
@@ -197,3 +197,4 @@ function validateEnv() {
 validateEnv();
 
 app.listen(PORT, () => { log('info', 'Server listening', { port: PORT, path: '/mcp' }); });
+
