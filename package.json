@@ -1,0 +1,25 @@
+{
+    "name": "devops-mcp-server",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "description": "",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.17.5",
+        "azure-devops-node-api": "^15.1.1",
+        "dotenv": "^17.2.2",
+        "zod": "^3.25.76",
+        "@azure/msal-node": "^2.16.2"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.3.1"
+    }
+}
