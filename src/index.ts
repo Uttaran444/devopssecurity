@@ -37,6 +37,10 @@ app.all('/mcp', async (req, res) => {
     }
 
     try {
+        if ((transport as any).setServerContext) {
+            // Attach request headers so tools can read Authorization for OBO
+            (transport as any).setServerContext({ headers: req.headers });
+        }
         await transport.handleRequest(req, res, req.body);
     } catch (error) {
         console.error('Error handling MCP request:', error);
