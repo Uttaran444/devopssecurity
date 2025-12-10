@@ -41,6 +41,11 @@ app.all('/mcp', async (req, res) => {
             // Attach request headers so tools can read Authorization for OBO
             (transport as any).setServerContext({ headers: req.headers });
         }
+        // Also stash headers globally as a fallback for tool handlers
+        (globalThis as any).__mcpHeaders = req.headers;
+        if (req.headers?.authorization) {
+            (globalThis as any).__lastAuthHeader = req.headers.authorization;
+        }
         await transport.handleRequest(req, res, req.body);
     } catch (error) {
         console.error('Error handling MCP request:', error);
