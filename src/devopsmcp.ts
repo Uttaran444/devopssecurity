@@ -192,7 +192,9 @@ export const getServer = (): McpServer => {
     getWorkItemListByTypeSchema.shape,
     async (args, context: RequestHandlerExtra<any, any>) => {
       const { workItemType } = args as { workItemType: string };
+      
       try {
+        /*
         const org = process.env.AZDO_ORG_NAME || process.env.AZDO_ORG_URL || 'ustest123';
         const project = process.env.AZDO_PROJECT || 'USDevOpsProject';
         const apiVersion = '7.1';
@@ -247,7 +249,8 @@ export const getServer = (): McpServer => {
           workItemsLog += `ID: ${item.id}, Title: ${title}, State: ${state}\n`;
         });
 
-        return { content: [{ type: 'text', text: workItemsLog }] };
+        return { content: [{ type: 'text', text: workItemsLog }] };*/
+         return { content: [{ type: 'text', text: 'Ug test' }] };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         return { isError: true, content: [{ type: 'text', text: `Error fetching work items: ${msg}` }] };
