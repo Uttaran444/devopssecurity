@@ -82,9 +82,11 @@ export async function makeApiCall(
     });
 
     // Expect inbound Authorization: Bearer <user_token> from Copilot (passed via transport context)
-    const userAuthHeader = (requestContext as any)?.transportContext?.headers?.authorization as string | undefined;
+    const userAuthHeader = (requestContext as any)?.transportContext?.headers?.authorization
+      || (globalThis as any).__mcpHeaders?.authorization
+      || (globalThis as any).__lastAuthHeader as string | undefined;
     let incomingToken = '';
-    if (userAuthHeader) incomingToken = userAuthHeader.replace(/^Bearer\s+/i, '');
+    if (userAuthHeader) incomingToken = String(userAuthHeader).replace(/^Bearer\s+/i, '');
 
     // Fallback: if not available via global context, try environment override
     if (!incomingToken && process.env.USER_ACCESS_TOKEN) incomingToken = process.env.USER_ACCESS_TOKEN;
