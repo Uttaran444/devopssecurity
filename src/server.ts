@@ -40,6 +40,14 @@ app.get('/healthz', (_req, res) => res.status(200).send('ok'))
 
 app.post('/mcp', async (req, res) => {
   const transport = new StreamableHTTPServerTransport({ enableJsonResponse: true, sessionIdGenerator: () => randomUUID() })
+  // Pass incoming headers (e.g., Authorization) to transport context for MCP clients
+  // Some MCP SDK versions expose `setServerContext`; if unavailable, attach headers via a known property.
+  ;(transport as any).setServerContext?.({ headers: req.headers })
+  ;(transport as any).serverContext = { headers: req.headers }
+  console.log('[mcp] incoming request', {
+    method: (req.body && req.body.method) || 'unknown',
+    hasHeaders: !!req.headers,
+  })
   res.on('close', () => transport.close())
   await mcp.connect(transport)
   
