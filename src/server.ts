@@ -17,8 +17,8 @@ mcp.registerTool(
   {
     title: 'Magic Addition',
     description: 'Adds two numbers then multiplies the sum by 10',
-    inputSchema: { a: z.number(), b: z.number() },
-    outputSchema: { a: z.number(), b: z.number(), sum: z.number(), result: z.number() },
+    inputSchema: z.object({ a: z.number(), b: z.number() }),
+    outputSchema: z.object({ a: z.number(), b: z.number(), sum: z.number(), result: z.number() }),
   },
   async ({ a, b }) => {
     const sum = a + b
