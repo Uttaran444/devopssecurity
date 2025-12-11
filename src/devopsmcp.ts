@@ -24,6 +24,23 @@ async function getAdoAccessToken(onBehalfOfToken: string): Promise<string> {
   return result.accessToken;
 }
 
+// Verify that the current user token (after OBO) can read the target org/project.
+async function ensureProjectAccess(org: string, project: string, context?: RequestHandlerExtra<any, any>) {
+  const url = `https://dev.azure.com/${org}/_apis/projects/${encodeURIComponent(project)}?api-version=7.1-preview.4`;
+  const checkResult = await makeApiCall(
+    'GET',
+    url,
+    null,
+    async () => {},
+    context
+  );
+
+  if (checkResult.isError) {
+    const msg = String(checkResult.content?.[0]?.text || 'Access check failed');
+    throw new Error(`Access denied or project not reachable for ${org}/${project}: ${msg}`);
+  }
+}
+
 /// Helper function to safely send notifications (used by makeApiCall)
 async function safeNotify(sendNotification: (notification: any) => void | Promise<void>, notification: any): Promise<void> {
   try {
@@ -204,6 +221,9 @@ export const getServer = (): McpServer => {
         const project = process.env.AZDO_PROJECT || 'USDevOpsProject';
         const apiVersion = '7.1';
 
+        // Verify current user token can access this project before running tool logic
+        await ensureProjectAccess(org, project, context);
+
         // Build WIQL POST URL and body
         const wiqlUrl = `https://dev.azure.com/${org}/${project}/_apis/wit/wiql?api-version=${apiVersion}`;
         const wiqlBody = { query: `SELECT [System.Id] FROM WorkItems WHERE [System.WorkItemType] = '${workItemType}' AND [System.TeamProject] = '${project}' ORDER BY [System.ChangedDate] DESC` };
@@ -279,6 +299,12 @@ export const getServer = (): McpServer => {
         const org = process.env.AZDO_ORG_NAME || process.env.AZDO_ORG_URL || 'ustest123';
         const project = process.env.AZDO_PROJECT || 'USDevOpsProject';
         const apiVersion = '7.1-preview';
+
+        await ensureProjectAccess(org, project, context);
+
+        await ensureProjectAccess(org, project, context);
+
+        await ensureProjectAccess(org, project, context);
 
         // If IDs not provided, fetch recent work item ids for the project (limit to 100)
         let workItemIds: number[] = ids && ids.length ? ids : [];
@@ -740,6 +766,8 @@ export const getServer = (): McpServer => {
         const wantContent = true;
         const limitFiles = typeof maxFiles === 'number' && maxFiles > 0 ? Math.min(maxFiles, 50) : 15; // cap hard at 50 to avoid excessive calls
         const contentLimit = typeof maxContentChars === 'number' && maxContentChars > 200 ? Math.min(maxContentChars, 20000) : 3500;
+
+        await ensureProjectAccess(org, project, context);
 
         await safeNotification(context, { method: 'notifications/message', params: { level: 'info', data: `Analyzing repo ${repoName} for keyword "${objectName}" (threshold=${relThreshold})` } });
 
