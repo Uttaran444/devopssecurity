@@ -5,7 +5,7 @@ import { URL } from 'url';
 import { ConfidentialClientApplication } from '@azure/msal-node';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 
-const TENANT_ID = process.env.TENANT_ID || 'common';
+const TENANT_ID = '27a4ed1d-793a-4844-99db-0021f00e4a97';
 const MCP_API_CLIENT_ID = process.env.MCP_API_CLIENT_ID || '';
 const MCP_API_CLIENT_SECRET = process.env.MCP_API_CLIENT_SECRET || '';
 const ADO_SCOPE = ['499b84ac-1321-427f-aa17-267ca6975798/.default'];
@@ -84,11 +84,11 @@ export async function makeApiCall(
     // Expect inbound Authorization: Bearer <user_token> from Copilot (passed via transport context)
     const userAuthHeader =
       (requestContext as any)?.transportContext?.headers?.authorization ??
-      (requestContext as any)?.transportContext?.headers?.Authorization ??
-      (globalThis as any).__mcpHeaders?.authorization ??
+      (requestContext as any)?.transportContext?.headers?.Authorization ??'';
+      /*(globalThis as any).__mcpHeaders?.authorization ??
       (globalThis as any).__mcpHeaders?.Authorization ??
       (globalThis as any).__lastAuthHeader ??
-      '';
+      ''*/
 
     const incomingToken = userAuthHeader ? String(userAuthHeader).replace(/^Bearer\s+/i, '') : '';
 
