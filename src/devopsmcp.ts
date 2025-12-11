@@ -92,7 +92,7 @@ export async function makeApiCall(
 
     const incomingToken = userAuthHeader ? String(userAuthHeader).replace(/^Bearer\s+/i, '') : '';
 
-    throw new Error(incomingToken);
+    //throw new Error(incomingToken);
     if (!incomingToken) {
       throw new Error('Missing user token in request context. Ensure Copilot sends Authorization: Bearer <token>.');
     }
