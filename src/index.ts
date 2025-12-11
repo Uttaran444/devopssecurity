@@ -43,8 +43,8 @@ app.all('/mcp', async (req, res) => {
         }
         // Also stash headers globally as a fallback for tool handlers
         (globalThis as any).__mcpHeaders = req.headers;
-        if (req.headers?.authorization) {
-            (globalThis as any).__lastAuthHeader = req.headers.authorization;
+        if (req.headers?.authorization || req.headers?.Authorization) {
+            (globalThis as any).__lastAuthHeader = req.headers.authorization || req.headers.Authorization;
         }
         await transport.handleRequest(req, res, req.body);
     } catch (error) {
