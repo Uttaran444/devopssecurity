@@ -84,11 +84,11 @@ export async function makeApiCall(
     // Expect inbound Authorization: Bearer <user_token> from Copilot (passed via transport context)
     const userAuthHeader =
       (requestContext as any)?.transportContext?.headers?.authorization ??
-      (requestContext as any)?.transportContext?.headers?.Authorization ??'';
-      /*(globalThis as any).__mcpHeaders?.authorization ??
+      (requestContext as any)?.transportContext?.headers?.Authorization ??
+      (globalThis as any).__mcpHeaders?.authorization ??
       (globalThis as any).__mcpHeaders?.Authorization ??
       (globalThis as any).__lastAuthHeader ??
-      ''*/
+      ''
 
     const incomingToken = userAuthHeader ? String(userAuthHeader).replace(/^Bearer\s+/i, '') : '';
 
