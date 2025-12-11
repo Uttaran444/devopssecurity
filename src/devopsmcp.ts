@@ -82,18 +82,17 @@ export async function makeApiCall(
     });
 
     // Expect inbound Authorization: Bearer <user_token> from Copilot (passed via transport context)
-    
-// In devopsmcp.js (makeApiCall):
-const userAuthHeader =
-  (requestContext as any)?.transportContext?.headers?.authorization ??
-  (requestContext as any)?.transportContext?.headers?.Authorization;
+    const userAuthHeader =
+      (requestContext as any)?.transportContext?.headers?.authorization ??
+      (requestContext as any)?.transportContext?.headers?.Authorization ??
+      (globalThis as any).__mcpHeaders?.authorization ??
+      (globalThis as any).__mcpHeaders?.Authorization ??
+      (globalThis as any).__lastAuthHeader ??
+      '';
 
-if (!userAuthHeader) {
-  throw new Error('Missing user token in request context. Ensure Copilot sends Authorization: Bearer <token>.');
-}
-const incomingToken = String(userAuthHeader).replace(/^Bearer\s+/i, '');
+    const incomingToken = userAuthHeader ? String(userAuthHeader).replace(/^Bearer\s+/i, '') : '';
 
-    
+    throw new Error(incomingToken);
     if (!incomingToken) {
       throw new Error('Missing user token in request context. Ensure Copilot sends Authorization: Bearer <token>.');
     }
